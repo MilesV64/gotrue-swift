@@ -21,6 +21,11 @@ public final class GoTrueClient {
       return try await Env.sessionManager.session()
     }
   }
+  
+  /// Returns the last saved session, with no guarantee about expiration
+  public var cachedSession: Session? {
+    return try? Env.localStorage.getSession()?.session
+  }
 
   init(
     url: URL,

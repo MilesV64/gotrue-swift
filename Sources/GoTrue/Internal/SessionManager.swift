@@ -69,7 +69,7 @@ private actor LiveSessionManager {
 }
 
 extension GoTrueLocalStorage {
-  fileprivate func getSession() throws -> StoredSession? {
+  func getSession() throws -> StoredSession? {
     try retrieve(key: "supabase.session").flatMap {
       try JSONDecoder.goTrue.decode(StoredSession.self, from: $0)
     }
