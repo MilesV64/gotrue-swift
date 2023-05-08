@@ -55,7 +55,13 @@ public final class GoTrueClient {
         _ = try await Env.sessionManager.session()
         continuation.yield(.signedIn)
       } catch {
-        continuation.yield(.signedOut)
+          if let error = error as? GoTrueError {
+              print("Error on getting session in auth client init: \(error)")
+              continuation.yield(.signedOut)
+          }
+          else {
+              print("Network error")
+          }
       }
     }
   }
