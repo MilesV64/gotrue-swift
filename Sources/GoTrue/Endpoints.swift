@@ -147,7 +147,7 @@ extension Paths {
     let path: String
 
     var post: Request<Void> {
-      Request(method: "POST", url: path)
+      Request(method: "POST", url: path, query: [("scope", "local")])
     }
   }
 }
