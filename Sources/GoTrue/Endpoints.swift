@@ -131,9 +131,15 @@ extension Paths {
       Request(method: "GET", url: path)
     }
 
-    func put(_ body: GoTrue.UserAttributes) -> Request<GoTrue.User> {
-      Request(method: "PUT", url: path, body: body)
+    func put(_ body: GoTrue.UserAttributes, redirectTo: URL? = nil) -> Request<GoTrue.User> {
+      Request(method: "PUT", url: path, query: makePostQuery(redirectTo), body: body)
     }
+      
+      private func makePostQuery(_ redirectTo: URL?) -> [(String, String?)] {
+        let encoder = URLQueryEncoder()
+        encoder.encode(redirectTo, forKey: "redirect_to")
+        return encoder.items
+      }
   }
 }
 

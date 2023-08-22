@@ -4,11 +4,13 @@ import KeychainAccess
 struct StoredSession: Codable {
   var session: Session
   var expirationDate: Date
+    
+    var buffer: TimeInterval {
+        return self.session.expiresIn / 2
+    }
 
   var isValid: Bool {
-      let buffer = self.session.expiresIn / 2
-      
-      if Date().addingTimeInterval(buffer) < expirationDate {
+      if Date().addingTimeInterval(self.buffer) < expirationDate {
           return true
       } else {
           return false
@@ -23,6 +25,7 @@ struct StoredSession: Codable {
 
 struct SessionManager {
   var session: () async throws -> Session
+  var alwaysRefreshedSession: () async throws -> Session
   var update: (_ session: Session) async throws -> Void
   var remove: () async -> Void
 }
@@ -31,7 +34,8 @@ extension SessionManager {
   static var live: Self {
     let instance = LiveSessionManager()
     return Self(
-      session: { try await instance.session() },
+      session: { try await instance.session(alwaysRefresh: false) },
+      alwaysRefreshedSession: { try await instance.session(alwaysRefresh: true) },
       update: { try await instance.update($0) },
       remove: { await instance.remove() }
     )
@@ -41,7 +45,7 @@ extension SessionManager {
 private actor LiveSessionManager {
   private var task: Task<Session, Error>?
 
-  func session() async throws -> Session {
+  func session(alwaysRefresh: Bool = false) async throws -> Session {
     if let task {
       return try await task.value
     }
@@ -50,7 +54,10 @@ private actor LiveSessionManager {
       throw GoTrueError.sessionNotFound
     }
 
-    if currentSession.isValid {
+    if !alwaysRefresh && currentSession.isValid {
+//      let buffer = currentSession.buffer
+//      let time = currentSession.expirationDate.timeIntervalSince(Date().addingTimeInterval(buffer))
+//      print("GOTRUE: Refreshing auth session in \(time)s")
       return currentSession.session
     }
 
@@ -59,6 +66,7 @@ private actor LiveSessionManager {
 
       let session = try await Env.sessionRefresher(currentSession.session.refreshToken)
       try update(session)
+      //print("GOTRUE: Refreshed auth session")
       return session
     }
 

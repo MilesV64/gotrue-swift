@@ -21,6 +21,12 @@ public final class GoTrueClient {
       return try await Env.sessionManager.session()
     }
   }
+
+  /// Returns the session ensuring it is currently refreshed
+  public func refreshedSession() async throws -> Session {
+    await initialize()
+    return try await Env.sessionManager.alwaysRefreshedSession()
+  }
   
   /// Returns the last saved session, with no guarantee about expiration
   public var cachedSession: Session? {
@@ -484,10 +490,10 @@ public final class GoTrueClient {
 
   /// Updates user data, if there is a logged in user.
   @discardableResult
-  public func update(user: UserAttributes) async throws -> User {
+    public func update(user: UserAttributes, redirectTo: URL? = nil) async throws -> User {
     var session = try await Env.sessionManager.session()
     let user = try await Env.client.send(
-      Paths.user.put(user).withAuthorization(session.accessToken)
+      Paths.user.put(user, redirectTo: redirectTo).withAuthorization(session.accessToken)
     ).value
     session.user = user
     try await Env.sessionManager.update(session)
