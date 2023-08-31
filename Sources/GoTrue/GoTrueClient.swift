@@ -189,6 +189,15 @@ public final class GoTrueClient {
       )
     )
   }
+    
+    public func getSessionFromIdToken(credentials: OpenIDConnectCredentials) async throws -> Session {
+        let request = Paths.token.post(
+            grantType: .idToken,
+            .openIDConnectCredentials(credentials)
+        )
+        
+        return try await Env.client.send(request).value
+    }
 
   private func _signIn(request: Request<Session>) async throws -> Session {
     await Env.sessionManager.remove()
@@ -420,6 +429,10 @@ public final class GoTrueClient {
     authEventChangeContinuation.yield(.tokenRefreshed)
     return session
   }
+    
+    public func setSession(session: Session) async throws {
+        try await Env.sessionManager.update(session)
+    }
 
   /// Signs out the current user, if there is a logged in user.
   public func signOut() async throws {
