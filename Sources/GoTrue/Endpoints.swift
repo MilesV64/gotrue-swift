@@ -144,16 +144,23 @@ extension Paths {
 }
 
 extension Paths {
-  static var logout: Logout {
-    Logout(path: "/logout")
+  static func logout(global: Bool) -> Logout {
+    Logout(path: "/logout", signOutGlobal: global)
   }
 
   struct Logout {
     /// Path: `/logout`
     let path: String
-
+    let signOutGlobal: Bool
+    
     var post: Request<Void> {
-      Request(method: "POST", url: path, query: [("scope", "local")])
+      var query: [(String, String?)]? = nil
+        
+      if signOutGlobal == false {
+        query = [("scope", "local")]
+      }
+        
+      return Request(method: "POST", url: path, query: query)
     }
   }
 }

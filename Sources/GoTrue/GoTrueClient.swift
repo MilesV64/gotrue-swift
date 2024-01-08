@@ -435,14 +435,15 @@ public final class GoTrueClient {
     }
 
   /// Signs out the current user, if there is a logged in user.
-  public func signOut() async throws {
+  public func signOut(global: Bool = false) async throws {
     defer { authEventChangeContinuation.yield(.signedOut) }
 
     let session = try? await Env.sessionManager.session()
     await Env.sessionManager.remove()
 
     if let session {
-      try await Env.client.send(Paths.logout.post.withAuthorization(session.accessToken)).value
+      let path = Paths.logout(global: global)
+      try await Env.client.send(path.post.withAuthorization(session.accessToken)).value
     }
   }
 
