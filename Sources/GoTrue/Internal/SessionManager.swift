@@ -6,7 +6,7 @@ struct StoredSession: Codable {
   var expirationDate: Date
     
     var buffer: TimeInterval {
-        return self.session.expiresIn - 30//self.session.expiresIn / 2
+        return self.session.expiresIn / 2
     }
 
   var isValid: Bool {
@@ -61,7 +61,6 @@ private actor LiveSessionManager {
       return currentSession.session
     }
 
-      print("reFRESHING")
     task = Task {
       defer { self.task = nil }
 
